@@ -8,13 +8,13 @@ namespace SocketIO.Net.Runtime
     {
         private readonly IConnection _connection;
         private readonly IFrameCodec _codec;
+        public IConnection Connection => _connection;
 
         public Peer(IConnection connection, IFrameCodec codec)
         {
             _connection = connection;
             _codec = codec;
         }
-
         public async Task SendAsync(ReadOnlyMemory<byte> payload, CancellationToken ct = default)
         {
             var frame = _codec.Encode(payload.Span);
@@ -92,5 +92,7 @@ namespace SocketIO.Net.Runtime
                 await _connection.CloseAsync();
             }
         }
+        
+      
     }
 }
