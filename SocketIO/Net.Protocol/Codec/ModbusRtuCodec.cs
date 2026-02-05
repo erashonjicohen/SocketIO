@@ -1,7 +1,7 @@
 using SocketIO.Net.Abstractions;
 using System.Buffers.Binary;
 
-namespace SocketIO.Net.Protocol;
+namespace SocketIO.Net.Protocol.Codec;
 
 public sealed class ModbusRtuCodec : IFrameCodec
 {

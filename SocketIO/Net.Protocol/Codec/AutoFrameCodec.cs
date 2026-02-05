@@ -2,7 +2,7 @@ using SocketIO.Net.Abstractions;
 using System.Runtime.CompilerServices;
 
 
-namespace SocketIO.Net.Protocol
+namespace SocketIO.Net.Protocol.Codec
 {
     /// <summary>
     /// Heurístico: prueba varios codecs contra el buffer y elige el "mejor".

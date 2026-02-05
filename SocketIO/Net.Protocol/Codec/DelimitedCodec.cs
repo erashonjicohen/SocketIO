@@ -1,6 +1,6 @@
 ﻿using SocketIO.Net.Abstractions;
 
-namespace SocketIO.Net.Protocol
+namespace SocketIO.Net.Protocol.Codec
 {
     public sealed class DelimitedCodec : IFrameCodec
     {

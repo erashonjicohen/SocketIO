@@ -1,10 +1,8 @@
 ﻿using SocketIO.Net.Abstractions;
-using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
-using System.Text;
 
-namespace SocketIO.Net.Protocol
+
+namespace SocketIO.Net.Protocol.Codec
 {
     public sealed class LengthFieldCodec : IFrameCodec
     {

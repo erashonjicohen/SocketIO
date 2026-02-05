@@ -1,7 +1,8 @@
 ﻿using SocketIO.Net.Abstractions;
+using SocketIO.Net.Protocol;
 using System.Buffers.Binary;
 
-namespace SocketIO.Net.Protocol
+namespace SocketIO.Net.Protocol.Codec
 {
     public static class PacketCodec
     {

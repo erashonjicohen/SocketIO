@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SocketIO.Net.Protocol
+namespace SocketIO.Net.Protocol.Codec
 {
     public sealed class FixedLengthCodec : IFrameCodec
     {
