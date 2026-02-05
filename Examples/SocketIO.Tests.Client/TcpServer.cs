@@ -1,7 +1,7 @@
-﻿using System.Net;
-using SocketIO.Net.Protocol;
-using SocketIO.Net.Runtime;
+﻿using SocketIO.Net.Runtime;
 using SocketIO.Net.Transport.Sockets;
+using SocketIO.Net.Protocol.Codec;
+using System.Net;
 
 
 public class TcpServer

@@ -6,9 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\SocketIO\SocketIO.csproj" />
+    <ProjectReference Include="..\..\SocketIO\SocketIO.csproj" />
   </ItemGroup>
-
 </Project>

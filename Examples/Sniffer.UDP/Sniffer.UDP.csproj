@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SocketIO\SocketIO.csproj" />
+    <ProjectReference Include="..\..\SocketIO\SocketIO.csproj" />
   </ItemGroup>
 
 </Project>

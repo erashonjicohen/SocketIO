@@ -1,4 +1,4 @@
-﻿using SocketIO.Net.Protocol;
+﻿using SocketIO.Net.Protocol.Codec;
 using SocketIO.Net.Runtime;
 using SocketIO.Net.Transport.Sockets;
 using System.Net;
