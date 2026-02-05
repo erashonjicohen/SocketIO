@@ -1,5 +1,5 @@
-﻿using SocketIO.Net.Protocol.Codec;
-using SocketIO.Net.Runtime;
+﻿using SocketIO.Net.Runtime;
+using SocketIO.Net.Protocol.Codec;
 using SocketIO.Net.Transport.Sockets;
 using System.Net;
 using System.Net.Sockets;
@@ -44,7 +44,6 @@ public class TcpClient
 
         while (true)
         {
-            
             var line = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(line)) break;
             await peer.SendAsync(Encoding.UTF8.GetBytes(line));
