@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<settings>
+	<KiSoft Ip="127.0.0.1" Port="9801" />
+	<DumpOptions MaxBytesPerMessage="8192" BytesPerLine="16" WriteToConsole="true" FilePath="C:\logs\kisoft\Dump"/>
+	<LogOptions Level="Debug" FilePath="C:\logs\kisoft_9801" Enabled="true" />	
+</settings>
