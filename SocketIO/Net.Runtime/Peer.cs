@@ -4,33 +4,35 @@ using System.Net.Sockets;
 
 namespace SocketIO.Net.Runtime
 {
-    public sealed class Peer
+    public sealed class Peer : IAsyncDisposable
     {
         private readonly IConnection _connection;
         private readonly IFrameCodec _codec;
-        public IConnection Connection => _connection;
+
+        private int _disposed;
 
         public Peer(IConnection connection, IFrameCodec codec)
         {
             _connection = connection;
             _codec = codec;
         }
+
+        public ValueTask CloseAsync() => _connection.CloseAsync();
+
         public async Task SendAsync(ReadOnlyMemory<byte> payload, CancellationToken ct = default)
         {
+            ThrowIfDisposed();
             var frame = _codec.Encode(payload.Span);
             await _connection.SendAsync(frame, ct);
         }
 
-        /// <summary>
-        /// Recibe bytes del socket, decodifica frames con IFrameCodec, y entrega cada frame a onFrame.
-        /// Si se provee dumper, hace dump por frame (no por chunk).
-        /// Maneja desconexión graceful (read==0) y reset (SocketException 10054).
-        /// </summary>
         public async Task ReceiveLoopAsync(
             Func<ReadOnlyMemory<byte>, Task> onFrame,
             FrameAwareDumper? dumper = null,
             CancellationToken ct = default)
         {
+            ThrowIfDisposed();
+
             var buffer = new byte[8192];
             int buffered = 0;
             int frameIndex = 0;
@@ -42,7 +44,6 @@ namespace SocketIO.Net.Runtime
                 while (!ct.IsCancellationRequested)
                 {
                     int read;
-
                     try
                     {
                         read = await _connection.ReceiveAsync(buffer.AsMemory(buffered), ct);
@@ -53,34 +54,34 @@ namespace SocketIO.Net.Runtime
                         ex.SocketErrorCode == SocketError.Shutdown ||
                         ex.SocketErrorCode == SocketError.OperationAborted)
                     {
-                        // remoto cerró/abortó (ej: 10054)
                         break;
                     }
 
-                    if (read == 0) // FIN graceful
-                        break;
+                    if (read == 0) break;
 
                     buffered += read;
 
                     ReadOnlySpan<byte> span = buffer.AsSpan(0, buffered);
 
-                    // Parse frames SYNC (Span OK)
+                    // Parse SYNC (Span OK) -> copiar frames a heap
                     var frames = new List<ReadOnlyMemory<byte>>();
-
                     while (_codec.TryDecode(ref span, out var frame))
                         frames.Add(frame);
 
-                    // compactar leftovers al inicio
+                    // compact leftovers
                     span.CopyTo(buffer);
                     buffered = span.Length;
 
-                    // Dispatch async (sin Span vivo)
+                    // Dispatch async
                     foreach (var f in frames)
                     {
                         frameIndex++;
 
                         if (dumper is not null)
-                            await dumper.DumpFrameAsync("RX", remote, frameIndex, f.Span);
+                        {
+                            // IMPORTANTE: que tu dumper NO reciba ReadOnlySpan en async.
+                            await dumper.DumpFrameAsync("RX", remote, frameIndex, f, ct); // <- ReadOnlyMemory
+                        }
 
                         await onFrame(f);
                     }
@@ -88,11 +89,23 @@ namespace SocketIO.Net.Runtime
             }
             finally
             {
-                // opcional: cerrar siempre
                 await _connection.CloseAsync();
             }
         }
-        
-      
+
+        private void ThrowIfDisposed()
+        {
+            if (Volatile.Read(ref _disposed) != 0)
+                throw new ObjectDisposedException(nameof(Peer));
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            if (Interlocked.Exchange(ref _disposed, 1) != 0)
+                return;
+
+            await _connection.DisposeAsync();
+        }
     }
 }
+
