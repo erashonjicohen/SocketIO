@@ -6,6 +6,8 @@
     <Project Path="Examples/SocketIO.Test.Serial.Connection/SocketIO.Test.Serial.Connection.csproj" Id="edf2da5a-dc45-4a37-8a45-130980aad2de" />
     <Project Path="Examples/SocketIO.Test.UDP/SocketIO.Test.UDP.csproj" Id="32484da0-7e10-4f3a-8dba-a71a48a04437" />
     <Project Path="Examples/SocketIO.Tests.Client/SocketIO.Tests.TCP.csproj" />
+    <Project Path="Test/Test.csproj" Id="298647d4-e87c-4619-96b0-31bc76170ff1" />
+    <Project Path="WebSocketIO/WebSocketIO.csproj" Id="360006a3-da97-4120-b866-f28fc5c10afd" />
   </Folder>
   <Project Path="SocketIO/SocketIO.csproj" />
 </Solution>
