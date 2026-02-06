@@ -8,16 +8,18 @@ namespace SocketIO.Net.Diagnostics
     {
         private readonly DumpSink _sink;
         private readonly DumpOptions _opt;
-
-        public UdpSnifferRaw(DumpSink sink, DumpOptions options)
+        private readonly Logger _logger;
+        
+        public UdpSnifferRaw(DumpSink sink, DumpOptions options , LoggerOptions? LogOptions = null)
         {
             _sink = sink;
             _opt = options;
+            _logger =  new Logger(LogOptions ?? new LoggerOptions { WriteToConsole = true });
         }
 
         public async Task RunAsync(int port, CancellationToken ct = default)
         {
-            Console.WriteLine($"🕵️ UDP Sniffer RAW escuchando en {port}");
+            _logger.Info($"🕵️ UDP Sniffer RAW escuchando en {port}");
 
             using var sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             sock.Bind(new IPEndPoint(IPAddress.Any, port));

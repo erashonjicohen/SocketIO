@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using SocketIO.Net.Diagnostics;
 
 namespace SocketIO.Net.Diagnostics
 {
@@ -24,6 +22,37 @@ namespace SocketIO.Net.Diagnostics
 
             string text = BuildFrameDumpText(dir, remote, frameIndex, frame);
             return _sink.WriteAsync(text);
+        }
+
+        public async Task DumpFrameAsync(
+            string dir,
+            string remote,
+            int frameIndex,
+            ReadOnlyMemory<byte> frame,
+            CancellationToken ct = default)
+        {
+            // SYNC: usar Span solo adentro
+            string text = BuildDumpText(dir, remote, frameIndex, frame.Span);
+
+            // ASYNC: escribir string
+            await _sink.WriteAsync(text, ct);
+        }
+        private string BuildDumpText(
+            string dir,
+            string remote,
+            int frameIndex,
+            ReadOnlySpan<byte> data)
+        {
+            int len = Math.Min(data.Length, _opt.MaxBytesPerMessage);
+            var slice = data.Slice(0, len);
+
+            var header =
+                $"{DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss.fff} | " +
+                $"{dir} | {remote} | frame={frameIndex} | bytes={data.Length}";
+
+            var dump = HexDump.Format(slice, _opt.BytesPerLine);
+
+            return header + "\n" + dump + "\n";
         }
 
 
