@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using KiSoftOneService.Models;
 using KiSoftOneService.Services;
 
@@ -33,7 +29,7 @@ namespace KiSoftOneService.Controllers
                     return BadRequest("Datos de pedido inválidos");
 
                 var result = await _kiSoftService.CreateOrderAsync(order);
-                
+
                 return Ok(new
                 {
                     success = result.IsSuccess,
@@ -61,7 +57,7 @@ namespace KiSoftOneService.Controllers
                     return BadRequest("Número de pedido requerido");
 
                 var result = await _kiSoftService.DeleteOrderAsync(tenant, orderNumber, "0000");
-                
+
                 return Ok(new
                 {
                     success = result.IsSuccess,
@@ -103,7 +99,7 @@ namespace KiSoftOneService.Controllers
                     return BadRequest("Datos de artículo inválidos");
 
                 var result = await _kiSoftService.CreateArticleMasterDataAsync(article);
-                
+
                 return Ok(new
                 {
                     success = result.IsSuccess,
@@ -145,7 +141,7 @@ namespace KiSoftOneService.Controllers
                     return BadRequest("Datos de unidad de almacenamiento inválidos");
 
                 var result = await _kiSoftService.CreateStorageUnitAsync(storageUnit);
-                
+
                 return Ok(new
                 {
                     success = result.IsSuccess,
@@ -187,7 +183,7 @@ namespace KiSoftOneService.Controllers
                     return BadRequest("Datos de solicitud inválidos");
 
                 var result = await _kiSoftService.CreateInventoryRequestAsync(request);
-                
+
                 return Ok(new
                 {
                     success = result.IsSuccess,
@@ -215,7 +211,7 @@ namespace KiSoftOneService.Controllers
                     return BadRequest("Filtros requeridos");
 
                 var result = await _kiSoftService.LockStockAsync(tenant ?? "DEFAULT", filters, "HOST");
-                
+
                 return Ok(new
                 {
                     success = result.IsSuccess,
@@ -242,7 +238,7 @@ namespace KiSoftOneService.Controllers
                     return BadRequest("Filtros requeridos");
 
                 var result = await _kiSoftService.UnlockStockAsync(tenant ?? "DEFAULT", filters, "HOST");
-                
+
                 return Ok(new
                 {
                     success = result.IsSuccess,
@@ -280,7 +276,7 @@ namespace KiSoftOneService.Controllers
             try
             {
                 bool success = await _kiSoftService.InitializeAsync(ipAddress);
-                
+
                 return Ok(new
                 {
                     success = success,
@@ -309,6 +305,29 @@ namespace KiSoftOneService.Controllers
             catch (Exception ex)
             {
                 _logger.LogError($"Error apagando: {ex.Message}");
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Endpoint de prueba para verificar conexión
+        /// </summary>
+        [HttpGet("health")]
+        public IActionResult Health()
+        {
+            try
+            {
+                return Ok(new
+                {
+                    success = true,
+                    message = "Sistema en línea",
+                    timestamp = DateTime.UtcNow.ToString("o"),
+                    version = "1.0.0"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error en health check: {ex.Message}");
                 return StatusCode(500, new { error = ex.Message });
             }
         }
