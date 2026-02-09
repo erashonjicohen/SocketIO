@@ -1,262 +1,123 @@
 @page "/"
-
 @{
     ViewData["Title"] = "KiSoft One - Sistema de Gestión";
 }
 
 <div class="container-fluid mt-5">
-    <div class="row mb-4">
+    <div class="row">
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    <h2>Sistema de Gestión KiSoft One</h2>
+                    <h2>🏭 Sistema KiSoft One - Gestión de Almacén</h2>
                 </div>
                 <div class="card-body">
-                    <div id="statusMessage" class="alert alert-info" role="alert" style="display:none;">
-                        <span id="statusText"></span>
-                    </div>
+                    <div id="statusMessage" class="alert" role="alert" style="display:none;"></div>
 
-                    <form id="initForm" class="mb-4">
-                        <div class="form-group">
-                            <label for="ipAddress">Dirección IP del Servidor:</label>
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="ipAddress" value="192.168.1.100" placeholder="XXX.XXX.XXX.XXX">
-                                <button type="button" class="btn btn-primary" onclick="initializeConnection()">
-                                    <i class="fas fa-plug"></i> Conectar
-                                </button>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h4>1️⃣ Verificar Servidor</h4>
+                            <div class="form-group">
+                                <label>IP del Servidor KiSoft One:</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="ipAddress" value="192.168.1.100" placeholder="192.168.1.100">
+                                    <button type="button" class="btn btn-primary" onclick="checkHealth()">
+                                        🔍 Diagnosticar
+                                    </button>
+                                </div>
+                                <small class="form-text text-muted">Primero verifica si el servidor responde</small>
                             </div>
                         </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- Pestaña de Pedidos -->
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <h4><i class="fas fa-box"></i> Gestión de Pedidos</h4>
-                </div>
-                <div class="card-body">
-                    <form id="orderForm">
-                        <div class="form-group">
-                            <label>Número de Pedido:</label>
-                            <input type="text" class="form-control" id="orderNumber" maxlength="12" placeholder="Ej: ORD20240001" required>
+                        <div class="col-md-6">
+                            <h4>2️⃣ Conectar</h4>
+                            <button type="button" class="btn btn-success btn-lg btn-block mt-3" id="connectBtn" onclick="initializeConnection()" disabled>
+                                🔗 Conectar a KiSoft One
+                            </button>
+                            <small class="form-text text-muted">Se habilita después de diagnosticar</small>
                         </div>
-                        <div class="form-group">
-                            <label>Tipo de Pedido:</label>
-                            <select class="form-control" id="orderType">
-                                <option value="01">01 - Pedido de Salida</option>
-                                <option value="10">10 - Entrega de Salida</option>
-                                <option value="35">35 - Retiro</option>
-                                <option value="36">36 - Full Cartón a Dispatch</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Tipo de Carga:</label>
-                            <select class="form-control" id="loadCarrier">
-                                <option value="LARGE">LARGE - Plástico Grande</option>
-                                <option value="CARTON">CARTON - Cartón</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Número de Cliente:</label>
-                            <input type="text" class="form-control" id="customerNumber" maxlength="12" placeholder="Cliente">
-                        </div>
-                        <div class="form-group">
-                            <label>Ruta Teórica:</label>
-                            <input type="text" class="form-control" id="routeNumber" maxlength="8" placeholder="Ruta">
-                        </div>
-                        <div class="form-group">
-                            <label>Prioridad (0-999):</label>
-                            <input type="number" class="form-control" id="priority" min="0" max="999" value="0">
-                        </div>
-                        <button type="button" class="btn btn-success btn-block" onclick="createOrder()">
-                            <i class="fas fa-plus"></i> Crear Pedido
-                        </button>
-                        <button type="button" class="btn btn-danger btn-block mt-2" onclick="deleteOrder()">
-                            <i class="fas fa-trash"></i> Eliminar Pedido
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pestaña de Artículos -->
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h4><i class="fas fa-cube"></i> Datos Maestros Artículos</h4>
-                </div>
-                <div class="card-body">
-                    <form id="articleForm">
-                        <div class="form-group">
-                            <label>Número de Artículo:</label>
-                            <input type="text" class="form-control" id="articleNumber" maxlength="12" placeholder="ART0001" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Nombre Artículo:</label>
-                            <input type="text" class="form-control" id="articleName" maxlength="40" placeholder="Nombre del artículo">
-                        </div>
-                        <div class="form-group">
-                            <label>Estación:</label>
-                            <select class="form-control" id="station">
-                                <option value="065">065 - OSR Shuttle</option>
-                                <option value="199">199 - Full Cartón</option>
-                                <option value="001">001 - Manual 1</option>
-                                <option value="002">002 - Manual 2</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Tamaño Embalaje:</label>
-                            <input type="number" class="form-control" id="packingSize" min="1" max="9999" value="1" placeholder="1">
-                        </div>
-                        <div class="form-group">
-                            <label>Número Eyección (10-80):</label>
-                            <input type="number" class="form-control" id="ejectionNumber" min="10" max="80" value="10">
-                        </div>
-                        <div class="form-group">
-                            <label>Longitud [mm]:</label>
-                            <input type="number" class="form-control" id="length" min="1" max="9999" value="100">
-                        </div>
-                        <div class="form-group">
-                            <label>Ancho [mm]:</label>
-                            <input type="number" class="form-control" id="width" min="1" max="9999" value="100">
-                        </div>
-                        <div class="form-group">
-                            <label>Alto [mm]:</label>
-                            <input type="number" class="form-control" id="height" min="1" max="9999" value="100">
-                        </div>
-                        <div class="form-group">
-                            <label>Peso (en 1/10 gramos):</label>
-                            <input type="number" class="form-control" id="weight" min="1" max="300000" value="1000">
-                        </div>
-                        <div class="form-group">
-                            <label>Stock Mínimo:</label>
-                            <input type="number" class="form-control" id="minStock" min="1" max="9999" value="5">
-                        </div>
-                        <div class="form-group">
-                            <label>Stock Máximo:</label>
-                            <input type="number" class="form-control" id="maxStock" min="1" max="9999" value="100">
-                        </div>
-                        <button type="button" class="btn btn-info btn-block" onclick="createArticle()">
-                            <i class="fas fa-plus"></i> Crear Artículo
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- Pestaña de Inventario -->
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header bg-warning text-dark">
-                    <h4><i class="fas fa-list-check"></i> Gestión Inventario</h4>
-                </div>
-                <div class="card-body">
-                    <form id="inventoryForm">
-                        <div class="form-group">
-                            <label>Número Solicitud Inventario:</label>
-                            <input type="text" class="form-control" id="inventoryRequestNumber" maxlength="7" placeholder="INV0001" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Estación:</label>
-                            <select class="form-control" id="invStation">
-                                <option value="065">065 - OSR</option>
-                                <option value="001">001 - Manual</option>
-                            </select>
-                        </div>
-                        <button type="button" class="btn btn-warning btn-block" onclick="createInventoryRequest()">
-                            <i class="fas fa-check-circle"></i> Solicitar Inventario
-                        </button>
-                    </form>
+                    </div>
 
                     <hr>
 
-                    <h5>Control de Stock</h5>
-                    <form id="stockLockForm">
-                        <div class="form-group">
-                            <label>Artículo a Bloquear:</label>
-                            <input type="text" class="form-control" id="lockArticle" maxlength="12" placeholder="Número artículo">
-                        </div>
-                        <button type="button" class="btn btn-danger btn-sm btn-block" onclick="lockStock()">
-                            <i class="fas fa-lock"></i> Bloquear Stock
-                        </button>
-                        <button type="button" class="btn btn-success btn-sm btn-block mt-2" onclick="unlockStock()">
-                            <i class="fas fa-unlock"></i> Desbloquear Stock
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pestaña de Unidades de Almacenamiento -->
-        <div class="col-md-6 mb-4">
-            <div class="card">
-                <div class="card-header bg-secondary text-white">
-                    <h4><i class="fas fa-warehouse"></i> Unidades de Almacenamiento</h4>
-                </div>
-                <div class="card-body">
-                    <form id="storageForm">
-                        <div class="form-group">
-                            <label>Código Unidad Almacenamiento:</label>
-                            <input type="text" class="form-control" id="unitCode" maxlength="6" placeholder="UN0001" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Estación:</label>
-                            <select class="form-control" id="unitStation">
-                                <option value="065">065 - OSR</option>
-                                <option value="001">001 - Manual 1</option>
-                                <option value="199">199 - Full Cartón</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Geocódigo:</label>
-                            <input type="text" class="form-control" id="geoCode" maxlength="12" placeholder="GEO001">
-                        </div>
-                        <div class="form-group">
-                            <label>Artículo:</label>
-                            <input type="text" class="form-control" id="unitArticle" maxlength="12" placeholder="Artículo">
-                        </div>
-                        <div class="form-group">
-                            <label>Cantidad:</label>
-                            <input type="number" class="form-control" id="unitQuantity" min="1" max="9999" value="1">
-                        </div>
-                        <div class="form-group">
-                            <label>Tipo Stock:</label>
-                            <select class="form-control" id="unitStockType">
-                                <option value="STANDARD">STANDARD</option>
-                                <option value="B6">B6</option>
-                                <option value="QQ">QQ</option>
-                            </select>
-                        </div>
-                        <button type="button" class="btn btn-secondary btn-block" onclick="createStorageUnit()">
-                            <i class="fas fa-plus"></i> Crear Unidad
-                        </button>
-                    </form>
+                    <h4>📊 Estado del Sistema</h4>
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>Servidor ASP.NET:</strong></td>
+                            <td id="aspStatus">✅ En línea</td>
+                        </tr>
+                        <tr>
+                            <td><strong>KiSoft One:</strong></td>
+                            <td id="kiSoftStatus">❌ Sin conectar</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Última verificación:</strong></td>
+                            <td id="lastCheck">-</td>
+                        </tr>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Log de Operaciones -->
-    <div class="row">
+    <!-- Paneles de Operaciones -->
+    <div class="row mt-4">
+        <!-- Pedidos -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4>📦 Gestión de Pedidos</h4>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Número de Pedido:</label>
+                        <input type="text" class="form-control" id="orderNumber" placeholder="ORD20240001">
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-success btn-block mt-2" onclick="createOrder()">
+                            ➕ Crear Pedido
+                        </button>
+                        <button class="btn btn-danger btn-block mt-2" onclick="deleteOrder()">
+                            🗑️ Eliminar Pedido
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Artículos -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h4>📋 Datos Maestros</h4>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label>Número de Artículo:</label>
+                        <input type="text" class="form-control" id="articleNumber" placeholder="ART0001">
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre:</label>
+                        <input type="text" class="form-control" id="articleName" placeholder="Nombre del artículo">
+                    </div>
+                    <button class="btn btn-secondary btn-block" onclick="createArticle()">
+                        ➕ Crear Artículo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log -->
+    <div class="row mt-4">
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header bg-dark text-white">
-                    <h4><i class="fas fa-file-alt"></i> Log de Operaciones</h4>
+                    <h4>📋 Log de Operaciones</h4>
                 </div>
                 <div class="card-body">
-                    <div id="logContainer" style="max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px;">
-                        <p class="text-muted">Esperando operaciones...</p>
+                    <div id="logContainer" style="height: 250px; overflow-y: auto; background-color: #f8f9fa; padding: 10px; border: 1px solid #dee2e6; font-family: monospace; font-size: 12px;">
+                        <p class="text-muted">Inicializando...</p>
                     </div>
-                    <button type="button" class="btn btn-outline-secondary btn-sm mt-2" onclick="clearLog()">
-                        Limpiar Log
-                    </button>
+                    <button class="btn btn-sm btn-outline-secondary mt-2" onclick="clearLog()">🗑️ Limpiar Log</button>
                 </div>
             </div>
         </div>
@@ -267,348 +128,258 @@
     .card {
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         border: none;
-        margin-bottom: 1rem;
     }
 
     .card-header {
         border-bottom: 3px solid rgba(0,0,0,0.125);
-        padding: 1rem;
-    }
-
-    .form-group label {
-        font-weight: 500;
-        margin-bottom: 0.5rem;
     }
 
     .btn {
-        border-radius: 0.25rem;
+        border-radius: 4px;
         font-weight: 500;
     }
 
     .alert {
-        border-radius: 0.25rem;
-    }
-
-    #logContainer {
-        background-color: #f8f9fa;
-        padding: 1rem;
-        border-radius: 0.25rem;
-        border: 1px solid #dee2e6;
+        border-radius: 4px;
     }
 </style>
 
 <script src="~/lib/jquery/jquery.min.js"></script>
 <script>
     const apiBaseUrl = '/api';
+    let isConnected = false;
+    let requestTimeout = 5000; // 5 segundos
 
-    function showStatus(message, type = 'info') {
-        const statusDiv = document.getElementById('statusMessage');
-        const statusText = document.getElementById('statusText');
-        statusText.textContent = message;
-        statusDiv.className = `alert alert-${type}`;
-        statusDiv.style.display = 'block';
-        setTimeout(() => {
-            statusDiv.style.display = 'none';
-        }, 5000);
+    // Log helper
+    function addLog(msg) {
+        const container = document.getElementById('logContainer');
+        const time = new Date().toLocaleTimeString();
+        const entry = document.createElement('div');
+        entry.innerHTML = `<span style="color: #666;">[${time}]</span> ${msg}`;
+        container.insertBefore(entry, container.firstChild);
     }
 
-    function addLog(message) {
-        const logContainer = document.getElementById('logContainer');
-        const timestamp = new Date().toLocaleTimeString();
-        const logEntry = document.createElement('div');
-        logEntry.textContent = `[${timestamp}] ${message}`;
-        logContainer.insertBefore(logEntry, logContainer.firstChild);
+    function showStatus(msg, type = 'info') {
+        const div = document.getElementById('statusMessage');
+        const colors = {
+            'success': 'alert-success',
+            'danger': 'alert-danger',
+            'warning': 'alert-warning',
+            'info': 'alert-info'
+        };
+        div.className = `alert ${colors[type]}`;
+        div.textContent = msg;
+        div.style.display = 'block';
+        setTimeout(() => div.style.display = 'none', 4000);
     }
 
     function clearLog() {
         document.getElementById('logContainer').innerHTML = '<p class="text-muted">Log limpiado</p>';
     }
 
+    // Función helper para llamadas API CON TIMEOUT
+    async function apiCall(url, options = {}) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), requestTimeout);
+
+        try {
+            const response = await fetch(url, {
+                ...options,
+                signal: controller.signal,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...options.headers
+                }
+            });
+
+            clearTimeout(timeoutId);
+
+            // Leer como texto primero
+            const text = await response.text();
+
+            if (!text) {
+                return { success: false, error: 'Respuesta vacía' };
+            }
+
+            // Parsear JSON
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                addLog(`⚠️ Respuesta no-JSON: ${text.substring(0, 80)}`);
+                return { success: false, error: 'Respuesta inválida' };
+            }
+        } catch (error) {
+            clearTimeout(timeoutId);
+            if (error.name === 'AbortError') {
+                addLog(`⏱️ Timeout después de ${requestTimeout}ms`);
+                return { success: false, error: 'Timeout' };
+            }
+            addLog(`❌ Error: ${error.message}`);
+            return { success: false, error: error.message };
+        }
+    }
+
+    // Verificar servidor local
+    async function checkHealth() {
+        addLog('🔍 Verificando servidor...');
+        showStatus('Verificando servidor...', 'info');
+
+        const data = await apiCall(`${apiBaseUrl}/system/health`);
+
+        if (data.success) {
+            addLog('✅ Servidor ASP.NET respondiendo');
+            showStatus('✅ Servidor disponible', 'success');
+            document.getElementById('connectBtn').disabled = false;
+            document.getElementById('kiSoftStatus').innerHTML = '⏳ Listo para conectar';
+            document.getElementById('lastCheck').textContent = new Date().toLocaleTimeString();
+        } else {
+            addLog('❌ Servidor no responde');
+            showStatus('❌ Servidor no disponible', 'danger');
+            document.getElementById('connectBtn').disabled = true;
+        }
+    }
+
+    // Conectar a KiSoft One
     async function initializeConnection() {
-        const ipAddress = document.getElementById('ipAddress').value;
-        if (!ipAddress) {
-            showStatus('Ingrese dirección IP', 'danger');
+        const ip = document.getElementById('ipAddress').value;
+        if (!ip) {
+            showStatus('Ingrese IP', 'warning');
             return;
         }
 
-        try {
-            addLog(`Conectando a ${ipAddress}...`);
-            const response = await fetch(`${apiBaseUrl}/system/initialize?ipAddress=${ipAddress}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            const data = await response.json();
-            
-            if (data.success) {
-                showStatus('Conectado exitosamente', 'success');
-                addLog('✓ Conexión establecida');
-            } else {
-                showStatus('Falló la conexión', 'danger');
-                addLog('✗ Error de conexión');
-            }
-        } catch (error) {
-            showStatus(`Error: ${error.message}`, 'danger');
-            addLog(`✗ Error: ${error.message}`);
+        addLog(`🔗 Conectando a ${ip}:9801...`);
+        showStatus(`Conectando a ${ip}...`, 'info');
+        document.getElementById('connectBtn').disabled = true;
+
+        const data = await apiCall(`${apiBaseUrl}/system/initialize?ipAddress=${ip}`, { method: 'POST' });
+
+        if (data.success) {
+            isConnected = true;
+            addLog('✅ Conexión exitosa con KiSoft One');
+            showStatus('✅ Conectado a KiSoft One', 'success');
+            document.getElementById('kiSoftStatus').innerHTML = '✅ Conectado';
+        } else {
+            addLog(`❌ Error: ${data.error || data.message || 'Error desconocido'}`);
+            showStatus('❌ No se pudo conectar', 'danger');
+            document.getElementById('kiSoftStatus').innerHTML = '❌ Error de conexión';
+            document.getElementById('connectBtn').disabled = false;
         }
     }
 
+    // Crear pedido
     async function createOrder() {
-        const order = {
-            tenant: 'DEFAULT',
-            orderNumber: document.getElementById('orderNumber').value,
-            sheetNumber: '0000',
-            orderType: document.getElementById('orderType').value,
-            loadCarrierType: document.getElementById('loadCarrier').value,
-            customerNumber: document.getElementById('customerNumber').value,
-            theoreticalRouteNumber: document.getElementById('routeNumber').value,
-            orderPriority: parseInt(document.getElementById('priority').value),
-            orderLines: []
-        };
-
-        if (!order.orderNumber) {
-            showStatus('Número de pedido requerido', 'warning');
+        if (!isConnected) {
+            showStatus('Primero conecta al servidor', 'warning');
             return;
         }
 
-        try {
-            addLog(`Creando pedido ${order.orderNumber}...`);
-            const response = await fetch(`${apiBaseUrl}/order/create`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(order)
-            });
-            const data = await response.json();
-            
-            if (data.success) {
-                showStatus('Pedido creado exitosamente', 'success');
-                addLog(`✓ Pedido creado: ${order.orderNumber}`);
-                document.getElementById('orderForm').reset();
-            } else {
-                showStatus(`Error: ${data.message}`, 'danger');
-                addLog(`✗ Error creando pedido: ${data.status}`);
-            }
-        } catch (error) {
-            showStatus(`Error: ${error.message}`, 'danger');
-            addLog(`✗ Error: ${error.message}`);
+        const num = document.getElementById('orderNumber').value;
+        if (!num) {
+            showStatus('Ingrese número de pedido', 'warning');
+            return;
+        }
+
+        addLog(`📦 Creando pedido ${num}...`);
+
+        const data = await apiCall(`${apiBaseUrl}/order/create`, {
+            method: 'POST',
+            body: JSON.stringify({
+                tenant: 'DEFAULT',
+                orderNumber: num,
+                sheetNumber: '0000',
+                orderType: '01',
+                loadCarrierType: 'LARGE',
+                customerNumber: 'CUST001',
+                theoreticalRouteNumber: 'ROUTE01',
+                orderPriority: 0,
+                orderLines: []
+            })
+        });
+
+        if (data.success) {
+            addLog(`✅ Pedido ${num} creado`);
+            showStatus('✅ Pedido creado', 'success');
+            document.getElementById('orderNumber').value = '';
+        } else {
+            addLog(`❌ Error: ${data.error || data.message}`);
+            showStatus('❌ Error al crear pedido', 'danger');
         }
     }
 
+    // Eliminar pedido
     async function deleteOrder() {
-        const orderNumber = document.getElementById('orderNumber').value;
-        if (!orderNumber) {
-            showStatus('Seleccione un pedido', 'warning');
+        const num = document.getElementById('orderNumber').value;
+        if (!num) {
+            showStatus('Ingrese número de pedido', 'warning');
             return;
         }
 
-        if (!confirm('¿Está seguro de que desea eliminar este pedido?')) return;
+        if (!confirm('¿Estás seguro?')) return;
 
-        try {
-            addLog(`Eliminando pedido ${orderNumber}...`);
-            const response = await fetch(`${apiBaseUrl}/order/delete?orderNumber=${orderNumber}`, {
-                method: 'POST'
-            });
-            const data = await response.json();
-            
-            if (data.success) {
-                showStatus('Pedido eliminado', 'success');
-                addLog(`✓ Pedido eliminado: ${orderNumber}`);
-            } else {
-                showStatus(`Error: ${data.message}`, 'danger');
-                addLog(`✗ Error eliminando pedido`);
-            }
-        } catch (error) {
-            showStatus(`Error: ${error.message}`, 'danger');
-            addLog(`✗ Error: ${error.message}`);
+        addLog(`🗑️ Eliminando pedido ${num}...`);
+
+        const data = await apiCall(`${apiBaseUrl}/order/delete?orderNumber=${num}`, { method: 'POST' });
+
+        if (data.success) {
+            addLog(`✅ Pedido ${num} eliminado`);
+            showStatus('✅ Pedido eliminado', 'success');
+        } else {
+            addLog(`❌ Error: ${data.error || data.message}`);
+            showStatus('❌ Error al eliminar', 'danger');
         }
     }
 
+    // Crear artículo
     async function createArticle() {
-        const article = {
-            tenant: 'DEFAULT',
-            articleNumber: document.getElementById('articleNumber').value,
-            articleName: document.getElementById('articleName').value,
-            station: document.getElementById('station').value,
-            packingSize: document.getElementById('packingSize').value,
-            ejectionNumber: parseInt(document.getElementById('ejectionNumber').value),
-            length: parseInt(document.getElementById('length').value),
-            width: parseInt(document.getElementById('width').value),
-            height: parseInt(document.getElementById('height').value),
-            weight: parseInt(document.getElementById('weight').value),
-            minStock: parseInt(document.getElementById('minStock').value),
-            maxStock: parseInt(document.getElementById('maxStock').value),
-            articleCodes: [],
-            characteristics: [],
-            properties: []
-        };
-
-        if (!article.articleNumber) {
-            showStatus('Número de artículo requerido', 'warning');
+        if (!isConnected) {
+            showStatus('Primero conecta al servidor', 'warning');
             return;
         }
 
-        try {
-            addLog(`Creando artículo ${article.articleNumber}...`);
-            const response = await fetch(`${apiBaseUrl}/article/create`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(article)
-            });
-            const data = await response.json();
-            
-            if (data.success) {
-                showStatus('Artículo creado', 'success');
-                addLog(`✓ Artículo creado: ${article.articleNumber}`);
-                document.getElementById('articleForm').reset();
-            } else {
-                showStatus(`Error: ${data.message}`, 'danger');
-                addLog(`✗ Error: ${data.status}`);
-            }
-        } catch (error) {
-            showStatus(`Error: ${error.message}`, 'danger');
-            addLog(`✗ Error: ${error.message}`);
-        }
-    }
-
-    async function createStorageUnit() {
-        const unit = {
-            storageUnitCode: document.getElementById('unitCode').value,
-            station: document.getElementById('unitStation').value,
-            geoCode: document.getElementById('geoCode').value,
-            stockLines: [{
-                articleNumber: document.getElementById('unitArticle').value,
-                packingSize: '0001',
-                quantity: parseInt(document.getElementById('unitQuantity').value),
-                stockType: document.getElementById('unitStockType').value,
-                stockQuality: '1'
-            }]
-        };
-
-        if (!unit.storageUnitCode || !unit.stockLines[0].articleNumber) {
-            showStatus('Datos incompletos', 'warning');
+        const num = document.getElementById('articleNumber').value;
+        const name = document.getElementById('articleName').value;
+        if (!num || !name) {
+            showStatus('Ingrese número y nombre', 'warning');
             return;
         }
 
-        try {
-            addLog(`Creando unidad ${unit.storageUnitCode}...`);
-            const response = await fetch(`${apiBaseUrl}/storage/create-unit`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(unit)
-            });
-            const data = await response.json();
-            
-            if (data.success) {
-                showStatus('Unidad creada', 'success');
-                addLog(`✓ Unidad creada: ${unit.storageUnitCode}`);
-                document.getElementById('storageForm').reset();
-            } else {
-                showStatus(`Error: ${data.message}`, 'danger');
-                addLog(`✗ Error: ${data.status}`);
-            }
-        } catch (error) {
-            showStatus(`Error: ${error.message}`, 'danger');
-            addLog(`✗ Error: ${error.message}`);
+        addLog(`📋 Creando artículo ${num}...`);
+
+        const data = await apiCall(`${apiBaseUrl}/article/create`, {
+            method: 'POST',
+            body: JSON.stringify({
+                tenant: 'DEFAULT',
+                articleNumber: num,
+                articleName: name,
+                station: '065',
+                packingSize: '1',
+                ejectionNumber: 10,
+                length: 100,
+                width: 100,
+                height: 100,
+                weight: 1000,
+                minStock: 5,
+                maxStock: 100,
+                articleCodes: [],
+                characteristics: [],
+                properties: []
+            })
+        });
+
+        if (data.success) {
+            addLog(`✅ Artículo ${num} creado`);
+            showStatus('✅ Artículo creado', 'success');
+            document.getElementById('articleNumber').value = '';
+            document.getElementById('articleName').value = '';
+        } else {
+            addLog(`❌ Error: ${data.error || data.message}`);
+            showStatus('❌ Error al crear artículo', 'danger');
         }
     }
 
-    async function createInventoryRequest() {
-        const request = {
-            tenant: 'DEFAULT',
-            inventoryRequestNumber: document.getElementById('inventoryRequestNumber').value,
-            filters: [{
-                station: document.getElementById('invStation').value
-            }]
-        };
-
-        if (!request.inventoryRequestNumber) {
-            showStatus('Número de solicitud requerido', 'warning');
-            return;
-        }
-
-        try {
-            addLog(`Creando solicitud de inventario ${request.inventoryRequestNumber}...`);
-            const response = await fetch(`${apiBaseUrl}/inventory/request`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(request)
-            });
-            const data = await response.json();
-            
-            if (data.success) {
-                showStatus('Solicitud de inventario creada', 'success');
-                addLog(`✓ Solicitud creada: ${request.inventoryRequestNumber}`);
-                document.getElementById('inventoryForm').reset();
-            } else {
-                showStatus(`Error: ${data.message}`, 'danger');
-                addLog(`✗ Error: ${data.status}`);
-            }
-        } catch (error) {
-            showStatus(`Error: ${error.message}`, 'danger');
-            addLog(`✗ Error: ${error.message}`);
-        }
-    }
-
-    async function lockStock() {
-        const article = document.getElementById('lockArticle').value;
-        if (!article) {
-            showStatus('Ingrese número de artículo', 'warning');
-            return;
-        }
-
-        try {
-            addLog(`Bloqueando stock de ${article}...`);
-            const response = await fetch(`${apiBaseUrl}/inventory/lock`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify([{
-                    articleNumber: article,
-                    stockType: 'STANDARD'
-                }])
-            });
-            const data = await response.json();
-            
-            if (data.success) {
-                showStatus('Stock bloqueado', 'success');
-                addLog(`✓ Stock bloqueado: ${article}`);
-            } else {
-                showStatus(`Error: ${data.message}`, 'danger');
-                addLog(`✗ Error: ${data.status}`);
-            }
-        } catch (error) {
-            showStatus(`Error: ${error.message}`, 'danger');
-            addLog(`✗ Error: ${error.message}`);
-        }
-    }
-
-    async function unlockStock() {
-        const article = document.getElementById('lockArticle').value;
-        if (!article) {
-            showStatus('Ingrese número de artículo', 'warning');
-            return;
-        }
-
-        try {
-            addLog(`Desbloqueando stock de ${article}...`);
-            const response = await fetch(`${apiBaseUrl}/inventory/unlock`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify([{
-                    articleNumber: article,
-                    stockType: 'STANDARD'
-                }])
-            });
-            const data = await response.json();
-            
-            if (data.success) {
-                showStatus('Stock desbloqueado', 'success');
-                addLog(`✓ Stock desbloqueado: ${article}`);
-            } else {
-                showStatus(`Error: ${data.message}`, 'danger');
-                addLog(`✗ Error: ${data.status}`);
-            }
-        } catch (error) {
-            showStatus(`Error: ${error.message}`, 'danger');
-            addLog(`✗ Error: ${error.message}`);
-        }
-    }
+    // Verificar al cargar la página
+    window.addEventListener('load', function() {
+        addLog('⚙️ Inicializando interfaz...');
+        checkHealth();
+    });
 </script>
